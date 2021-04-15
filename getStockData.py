@@ -10,7 +10,4 @@ def get_stock_data():
     return stock_data
 
 
-appl = get_stock_data()
-
-print(appl)
 
