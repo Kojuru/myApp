@@ -46,8 +46,10 @@ stock.to_sql(name="stocklist2", con=engine, if_exists="replace", index="True", i
 
 mycursor.execute("SELECT * FROM stocklist2")
 
-for x in mycursor:
-    print(x)
+myresult = mycursor.fetchall()
+
+for x in myresult:
+  print(x)
 
 
 
