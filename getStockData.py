@@ -2,6 +2,7 @@ import pandas_datareader as pdr
 import datetime
 import mysql.connector
 import datetime
+from sqlalchemy import create_engine
 
 
 def get_stock_data():
@@ -25,6 +26,8 @@ mydb = mysql.connector.connect(
     database="stock_data"
 )
 
+engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
+
 mycursor = mydb.cursor()
 
 stock = get_stock_data()
@@ -33,24 +36,25 @@ stock = get_stock_data()
 #mydb.commit()
 #mycursor.execute("CREATE TABLE stocklist (date TIMESTAMP, high FLOAT, low FLOAT, open FLOAT, close FLOAT, volume DOUBLE, ajdclose FLOAT)")
 
-mycursor.execute("ALTER TABLE stocklist MODIFY date DATE")
+#mycursor.execute("ALTER TABLE stocklist MODIFY date DATE")
 
-mycursor.execute("DESCRIBE stocklist")
+#mycursor.execute("DESCRIBE stocklist")
+#for x in mycursor:
+#    print(x)
+
+stock.to_sql(name="stocklist2", con=engine, if_exists="replace", index="True", index_label="ID")
+
+mycursor.execute("SELECT * FROM stocklist2")
+
 for x in mycursor:
     print(x)
 
-#stock.to_sql("stocklist", con=)
 
-for row in stock.itertuples():
-    print(row)
-    mycursor.execute(
-        "INSERT INTO stocklist (date, high, low, open, close, volume,ajdclose) VALUES (%s,%s,%s,%s,%s,%s,%s)",
-        row
-    )
 
-mydb.commit()
 
-mycursor.execute("SHOW stocklist")
-for x in mycursor:
-    print(x)
+
+
+#mycursor.execute("SHOW stocklist")
+#for x in mycursor:
+#    print(x)
 
