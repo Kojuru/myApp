@@ -10,5 +10,6 @@ setup(
     entry_points='''
         [console_scripts]
         download=main:download
+        serve=main:serve
     '''
 )
