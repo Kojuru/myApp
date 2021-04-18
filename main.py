@@ -10,6 +10,12 @@ from sqlalchemy import create_engine, MetaData, Table
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 import datetime
+from sys import argv
+from flask import Flask, jsonify
+import flaskRest
+
+### Connection to local DB
+engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 
 @click.command(context_settings={"ignore_unknown_options": True})
 @click.argument('start', nargs=1)
@@ -17,8 +23,7 @@ import datetime
 @click.argument('stock', nargs=1)
 
 def download(start, end, stock):
-    ### Connection to local DB
-    engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
+
 
     click.echo("Hello")
 
@@ -36,33 +41,21 @@ def download(start, end, stock):
 if __name__=="__main__":
     download
 
+
 def serve():
 
-    hostName = "localhost"
-    serverPort = 8080
+    app = Flask(__name__)
 
-    class MyServer(BaseHTTPRequestHandler):
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("<html><head><title>https://pythonbasics.org</title></head>", "utf-8"))
-            self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
-            self.wfile.write(bytes("<body>", "utf-8"))
-            self.wfile.write(bytes("<p>This is an example web server.</p>", "utf-8"))
-            self.wfile.write(bytes("</body></html>", "utf-8"))
+    @app.route('/mean', methods=['GET'])
+    def get_mean():
+        result = engine.execute("SELECT AVG(High) FROM stocklist2")
 
-    if __name__ == "__main__":
-        webServer = HTTPServer((hostName, serverPort), MyServer)
-        print("Server started http://%s:%s" % (hostName, serverPort))
+        return jsonify({'tasks': result})
 
-        try:
-            webServer.serve_forever()
-        except KeyboardInterrupt:
-            pass
+    #Run Server
+    app.run(debug=True)
 
-        webServer.server_close()
-        print("Server stopped.")
+
 
 if __name__=="__main__":
     serve
