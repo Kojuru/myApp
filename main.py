@@ -24,7 +24,6 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 
 def download(start, end, stock):
 
-
     click.echo("Hello")
 
     ### great stock element
@@ -50,7 +49,21 @@ def serve():
     def get_mean():
         result = engine.execute("SELECT AVG(High) FROM stocklist2")
 
-        return jsonify({'tasks': result})
+        for x in result:
+            return jsonify(
+                {'mean': str(x[0])}
+            )
+
+    @app.route('/datapoints', methods=['GET'])
+    def get_datapoints():
+
+        result = engine.execute("SELECT COUNT(High) FROM stocklist2")
+
+        for x in result:
+            return jsonify(
+                {'Number of data points': str(x[0])}
+            )
+
 
     #Run Server
     app.run(debug=True)
