@@ -30,12 +30,8 @@ def download(start, end, stock):
     stock = gsd.get_stock_data(stock, start, end)
 
     ### insert stocklist into DB
-    stock.to_sql(name="stocklist2", con=engine, if_exists="replace", index="True", index_label="ID")
+    stock.to_sql(name="stocklist2", con=engine, if_exists="append", index="True")
 
-    result = engine.execute("SELECT AVG(High) FROM stocklist2")
-
-    for x in result:
-         click.echo(x[0])
 
 if __name__=="__main__":
     download
@@ -47,12 +43,30 @@ def serve():
 
     @app.route('/mean', methods=['GET'])
     def get_mean():
-        result = engine.execute("SELECT AVG(High) FROM stocklist2")
+        ### Idee: Alle Means werden in eine Liste appended. String formation ggf. in Select Abfrage reinpacken um ggf. curl Arguments abzufangen.
+        ### "Spezifische Means müssen über einen POST Request gehandlet werden
+
+        ### Select means from the DB
+        result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume) FROM stocklist2")
+
+        mean = []
 
         for x in result:
-            return jsonify(
-                {'mean': str(x[0])}
-            )
+            mean.append(x)
+
+        return jsonify(
+            {
+                'High Mean': round(float(mean[0][0]),2),
+                'Low Mean': round(float(mean[0][1]),2),
+                'Open Mean': round(float(mean[0][2]),2),
+                'Close Mean': round(float(mean[0][3]),2),
+                'Volume Mean': round(float(mean[0][4]),2)
+   #             'Adj Close Mean': str(mean[0][5])
+            }
+        )
+
+
+
 
     @app.route('/datapoints', methods=['GET'])
     def get_datapoints():
