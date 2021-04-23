@@ -49,10 +49,10 @@ def serve():
         ### Select means from the DB
         result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume) FROM stocklist2")
 
-        mean = []
+        ###Append result tuples to mean
+        mean_list = (x for x in result)
 
-        for x in result:
-            mean.append(x)
+        mean = list(mean_list)
 
         return jsonify(
             {
@@ -77,6 +77,22 @@ def serve():
             return jsonify(
                 {'Number of data points': str(x[0])}
             )
+
+    @app.route('/peaktopeak', methods=['GET'])
+    def get_peaktopeak():
+
+        result = engine.execute("SELECT MAX(High), MIN(Low) FROM stocklist2")
+
+        amplitude = []
+
+        for x in result:
+            amplitude.append(x)
+
+        return jsonify(
+            {
+                'Peak to Peak Amplitude': round((float(amplitude[0][0])-float(amplitude[0][1])),2)
+             }
+        )
 
 
     #Run Server
