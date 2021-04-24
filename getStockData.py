@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, MetaData, Table
 def get_stock_data(stock, start, end):
     '''
     IF falls Start > End ist. Dann nochmal neue Eingabe fordern vom User.
+    If something doesnt work properly, return something
+    When download is sucessful, return a message --> try/error
     :return:
     '''
 
