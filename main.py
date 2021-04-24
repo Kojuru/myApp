@@ -1,11 +1,12 @@
 import getStockData as gsd
 import click
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine
 from flask import Flask, jsonify
 
 '''
 Ideas:
 - Create maybe a test-class for testing my API?
+- return currency ($)
 
 '''
 
@@ -17,21 +18,22 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 #@click.argument('end', nargs=1)
 #@click.argument('stock', nargs=1)
 @click.option('--stock', prompt="Stock listing name", help="Stock you want to download")
-@click.option("--start", prompt="Start date", help="Start date you want download stock data")
-@click.option("--end", prompt="End date", help="End date you want download stock data")
+@click.option("--start", prompt="Start date YYYY-mm-dd", help="Start date you want download stock data")
+@click.option("--end", prompt="End date YYYY-mm-dd", help="End date you want download stock data")
 
 ### Start Download from command line of a given stock in a given time period. Date must be in Format "YYYY-mm-dd". Helper function need to be implemented.
 def download(start, end, stock):
     '''This script starts download '''
     click.echo("Download ist gestartet.")
 
-    ### great stock element as pandas DataFrame object
+    ### creat stock element as pandas DataFrame object
     stock = gsd.get_stock_data(stock, start, end)
 
-    click.echo(type(stock))
+    #click.echo(type(stock))
 
     ### insert stocklist into DB
-    stock.to_sql(name="stocklist2", con=engine, if_exists="append", index="True")
+    ### To DO: change db name
+    stock.to_sql(name="stocklist2", con=engine, if_exists="replace", index="True")
 
 
 if __name__=="__main__":
@@ -54,9 +56,10 @@ def serve():
         ###Append result tuples to mean
         mean_list = (x for x in result)
 
+        ###TO DO: not necessary
         mean = list(mean_list)
 
-        ### Ggf. mean object umwandeln?
+        ### TO DO: Ggf. mean object umwandeln?
         return jsonify(
             {
                 'High Mean': round(float(mean[0][0]),2),
