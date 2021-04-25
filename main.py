@@ -29,6 +29,9 @@ def download(start, end, stock):
     ### creat stock element as pandas DataFrame object
     stock = gsd.get_stock_data(stock, start, end)
 
+    ###Alter column "Adj Close" to "AdjClose"
+    engine.execute("ALTER TABLE stocklist2 CHANGE 'Adj Close' AdjClose")
+
     #click.echo(type(stock))
 
     ### insert stocklist into DB
@@ -54,7 +57,11 @@ def serve():
         result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume), AVG('Adj Close') FROM stocklist2")
 
         ###Append result tuples to mean
-        mean_list = (x for x in result)
+        mean_list = [x for x in result]
+
+        click.echo(mean_list[0][5])
+
+        click.echo("Hello")
 
         ###TO DO: not necessary
         mean = list(mean_list)
@@ -62,7 +69,7 @@ def serve():
         ### TO DO: Ggf. mean object umwandeln?
         return jsonify(
             {
-                'High Mean': round(float(mean[0][0]),2),
+                'High Mean': "$ "+ str(round(float(mean[0][0]),2)),
                 'Low Mean': round(float(mean[0][1]),2),
                 'Open Mean': round(float(mean[0][2]),2),
                 'Close Mean': round(float(mean[0][3]),2),
