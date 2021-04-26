@@ -10,13 +10,29 @@ def get_stock_data(stock, start, end):
     :return:
     '''
 
-    ### get stock data from yahooo
-    stock_data = pdr.get_data_yahoo(stock,
-                                    start=start,
-                                    end=end
-                                    )
+    try:
+        ### get stock data from yahooo
+        stock_data = pdr.get_data_yahoo(stock,
+                                        start=start,
+                                        end=end
+                                        )
 
-    return stock_data
+        ### Deleting whitespace in column "Adj Close"
+        stock_data = stock_data.rename(columns={stock_data.columns[5]: "AdjClose"})
+
+        return stock_data
+
+    except Exception as ex:
+
+        print("Es ist ein Fehler aufgetreten" + ex)
+
+        return 1
+
+
+
+
+
+
 
 
 

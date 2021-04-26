@@ -2,6 +2,7 @@ import getStockData as gsd
 import click
 from sqlalchemy import create_engine
 from flask import Flask, jsonify
+import pandas
 
 '''
 Ideas:
@@ -21,6 +22,8 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 @click.option("--start", prompt="Start date YYYY-mm-dd", help="Start date you want download stock data")
 @click.option("--end", prompt="End date YYYY-mm-dd", help="End date you want download stock data")
 
+### TODO: Try/Except Block. Falls Fehler gib diesen Fehler aus und
+
 ### Start Download from command line of a given stock in a given time period. Date must be in Format "YYYY-mm-dd". Helper function need to be implemented.
 def download(start, end, stock):
     '''This script starts download '''
@@ -29,14 +32,16 @@ def download(start, end, stock):
     ### creat stock element as pandas DataFrame object
     stock = gsd.get_stock_data(stock, start, end)
 
-    ###Alter column "Adj Close" to "AdjClose"
-    engine.execute("ALTER TABLE stocklist2 CHANGE 'Adj Close' AdjClose")
+    if stock==1:
 
-    #click.echo(type(stock))
+        return
+
+    click.echo("Download war erfolgreich")
 
     ### insert stocklist into DB
     ### To DO: change db name
-    stock.to_sql(name="stocklist2", con=engine, if_exists="replace", index="True")
+    stock.to_sql(name="stocklist", con=engine, if_exists="replace", index="Date")
+
 
 
 if __name__=="__main__":
@@ -54,7 +59,7 @@ def serve():
         ### "Spezifische Means müssen über einen POST Request gehandlet werden
 
         ### Select means from the DB and creates an [object] --> Specify what object
-        result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume), AVG('Adj Close') FROM stocklist2")
+        result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume), AVG(AdjClose) FROM stocklist")
 
         ###Append result tuples to mean
         mean_list = [x for x in result]
@@ -70,11 +75,11 @@ def serve():
         return jsonify(
             {
                 'High Mean': "$ "+ str(round(float(mean[0][0]),2)),
-                'Low Mean': round(float(mean[0][1]),2),
-                'Open Mean': round(float(mean[0][2]),2),
-                'Close Mean': round(float(mean[0][3]),2),
-                'Volume Mean': round(float(mean[0][4]),2),
-                'Adj Close Mean': str(mean[0][5])
+                'Low Mean': "$ "+ str(round(float(mean[0][1]),2)),
+                'Open Mean': "$ " + str(round(float(mean[0][2]),2)),
+                'Close Mean': "$ " + str(round(float(mean[0][3]),2)),
+                'Volume Mean': "$ "+ str(round(float(mean[0][4]),2)),
+                'Adj Close Mean': "$ "+ str(round(float(mean[0][5]),2))
             }
         )
 
@@ -84,7 +89,7 @@ def serve():
     @app.route('/datapoints', methods=['GET'])
     def get_datapoints():
 
-        result = engine.execute("SELECT COUNT(High) FROM stocklist2")
+        result = engine.execute("SELECT COUNT(High) FROM stocklist")
 
         for x in result:
             return jsonify(
@@ -95,7 +100,7 @@ def serve():
     @app.route('/peaktopeak', methods=['GET'])
     def get_peaktopeak():
 
-        result = engine.execute("SELECT MAX(High), MIN(Low) FROM stocklist2")
+        result = engine.execute("SELECT MAX(High), MIN(Low) FROM stocklist")
 
         amplitude = []
 
