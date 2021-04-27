@@ -1,8 +1,8 @@
 import getStockData as gsd
 import click
 from sqlalchemy import create_engine
-from flask import Flask, jsonify
-import pandas
+from flask import Flask, jsonify, request
+import datetime
 
 '''
 Ideas:
@@ -22,19 +22,32 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 @click.option("--start", prompt="Start date YYYY-mm-dd", help="Start date you want download stock data")
 @click.option("--end", prompt="End date YYYY-mm-dd", help="End date you want download stock data")
 
-### TODO: Try/Except Block. Falls Fehler gib diesen Fehler aus und
 
 ### Start Download from command line of a given stock in a given time period. Date must be in Format "YYYY-mm-dd". Helper function need to be implemented.
 def download(start, end, stock):
     '''This script starts download '''
     click.echo("Download ist gestartet.")
 
+    '''print(type(end))
+    print(end)
+
+    end = datetime.datetime.strptime(end, "%Y-%m-%d")
+    start = datetime.datetime.strptime(start, "%Y-%m-%d")
+
+    print(type(end))
+
+    if end > start:
+        print("Bin hier")
+        start, end = end, start
+
+    print(end)'''
+
     ### creat stock element as pandas DataFrame object
     stock = gsd.get_stock_data(stock, start, end)
 
-    if stock==1:
-
-        return
+    ### if error occurs, stop download function --> doesnt work atm
+   # if stock==1:
+    #    return
 
     click.echo("Download war erfolgreich")
 
@@ -53,10 +66,24 @@ def serve():
     app = Flask(__name__)
 
     ### Returns mean of high, low, open, close, volume, adj close
-    @app.route('/mean', methods=['GET'])
+    @app.route('/mean', methods=["GET","POST"])
     def get_mean():
         ### Idee: Alle Means werden in eine Liste appended. String formation ggf. in Select Abfrage reinpacken um ggf. curl Arguments abzufangen.
         ### "Spezifische Means müssen über einen POST Request gehandlet werden
+
+        if request.method == "POST":
+            a = request.get_data().decode("UTF-8")
+
+            result = engine.execute(f"SELECT AVG({a}) FROM stocklist")
+            mean_list = [x for x in result]
+
+            mean = list(mean_list)
+
+            return jsonify(
+                {
+                    f'{a} Mean': "$ " + str(round(float(mean[0][0]), 2)),
+                }
+            )
 
         ### Select means from the DB and creates an [object] --> Specify what object
         result = engine.execute("SELECT AVG(High), AVG(LOW), AVG(Open), AVG(Close), AVG(Volume), AVG(AdjClose) FROM stocklist")

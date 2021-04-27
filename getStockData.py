@@ -1,4 +1,5 @@
 import pandas_datareader as pdr
+import datetime
 
 
 
@@ -22,9 +23,14 @@ def get_stock_data(stock, start, end):
 
         return stock_data
 
+    except ValueError as vE:
+        print("Es ist ein Fehler aufgetreten: "+ str(vE))
+
+        return 1
+
     except Exception as ex:
 
-        print("Es ist ein Fehler aufgetreten" + ex)
+        print("Es ist ein Fehler aufgetreten: " + str(ex))
 
         return 1
 
