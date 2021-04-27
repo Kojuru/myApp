@@ -16,7 +16,7 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 ### Start Download from command line of a given stock in a given time period. Date must be in Format "YYYY-mm-dd". Helper function need to be implemented.
 def download(start, end, stock):
     '''This script starts download '''
-    click.echo("Download ist gestartet.")
+    click.echo("Download is started.")
 
     '''print(type(end))
     print(end)
@@ -36,10 +36,10 @@ def download(start, end, stock):
     stock = gsd.get_stock_data(stock, start, end)
 
     ### if error occurs, stop download function --> doesnt work atm
-   # if stock==1:
-    #    return
+    if stock==1:
+        return
 
-    click.echo("Download war erfolgreich")
+    click.echo("Download was successful")
 
     ### insert stocklist into DB
     stock.to_sql(name="stocklist", con=engine, if_exists="replace", index="Date")

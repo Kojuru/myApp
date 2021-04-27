@@ -1,14 +1,14 @@
 import pandas_datareader as pdr
-import datetime
 
 
 
 def get_stock_data(stock, start, end):
     '''
-    IF falls Start > End ist. Dann nochmal neue Eingabe fordern vom User.
-    If something doesnt work properly, return something
-    When download is sucessful, return a message --> try/error
-    :return:
+    Gets data from a specific stock in a determined time.
+    :param stock: stock name (type: string)
+    :param start: start date (type: string)
+    :param end: end date (type: string)
+    :return: Pandas DataFrame object
     '''
 
     try:
@@ -24,13 +24,13 @@ def get_stock_data(stock, start, end):
         return stock_data
 
     except ValueError as vE:
-        print("Es ist ein Fehler aufgetreten: "+ str(vE))
+        print("An error has occurred: "+ str(vE))
 
         return 1
 
     except Exception as ex:
 
-        print("Es ist ein Fehler aufgetreten: " + str(ex))
+        print("An error has occured: " + str(ex))
 
         return 1
 

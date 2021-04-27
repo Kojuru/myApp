@@ -18,6 +18,7 @@ def serve():
         ### Idee: Alle Means werden in eine Liste appended. String formation ggf. in Select Abfrage reinpacken um ggf. curl Arguments abzufangen.
         ### "Spezifische Means müssen über einen POST Request gehandlet werden
 
+        ### POST-Request --> determine Mean
         if request.method == "POST":
             detMean = request.get_data().decode("UTF-8")
 
