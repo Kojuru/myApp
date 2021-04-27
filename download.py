@@ -1,6 +1,8 @@
 import click
 import getStockData as gsd
 from sqlalchemy import create_engine
+from sqlalchemy import inspect
+
 
 engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 
@@ -16,33 +18,50 @@ engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 ### Start Download from command line of a given stock in a given time period. Date must be in Format "YYYY-mm-dd". Helper function need to be implemented.
 def download(start, end, stock):
     '''This script starts download '''
-    click.echo("Download is started.")
 
-    '''print(type(end))
-    print(end)
+    try:
+        click.echo("Download is started!")
 
-    end = datetime.datetime.strptime(end, "%Y-%m-%d")
-    start = datetime.datetime.strptime(start, "%Y-%m-%d")
+        ### creat stock element as pandas DataFrame object
+        stock = gsd.get_stock_data(stock, start, end)
 
-    print(type(end))
 
-    if end > start:
-        print("Bin hier")
-        start, end = end, start
+        click.echo("Download was successful!")
 
-    print(end)'''
+        ### If table does not exist, create a new one
+        insp = inspect(engine)
 
-    ### creat stock element as pandas DataFrame object
-    stock = gsd.get_stock_data(stock, start, end)
+        if not "stocklist" in insp.get_table_names():
+            stock.to_sql(name="stocklist", con=engine, index="Date")
+            click.echo("New table 'stocklist' was created")
 
-    ### if error occurs, stop download function --> doesnt work atm
-    if stock==1:
-        return
+        else:
+            ### insert stocklist into DB and check for duplicates
+            stock.to_sql(name="temptable", con=engine, if_exists="replace", index="Date")
 
-    click.echo("Download was successful")
+            ### If duplicates exist, append only new values
+            with engine.begin() as cn:
+                sql = """INSERT INTO stocklist (Date, High, Low, Open, Close, Volume, AdjClose, Name)
+                                SELECT t.Date, t.High, t.Low, t.Open, t.Close, t.Volume, t.AdjClose, t.Name
+                                FROM temptable t
+                                WHERE NOT EXISTS 
+                                    (SELECT 1 FROM stocklist s
+                                     WHERE t.Date = s.Date
+                                     AND t.Name = s.Name)"""
 
-    ### insert stocklist into DB
-    stock.to_sql(name="stocklist", con=engine, if_exists="replace", index="Date")
+                cn.execute(sql)
+
+        ### TODO: if no new data was inserted than echo something else
+        click.echo("Data was stored in the table")
+
+
+
+    except Exception as ex:
+        print("An error has occured: " + str(ex))
+
+        #traceback.print_exc()
+
+
 
 
 

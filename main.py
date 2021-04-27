@@ -5,8 +5,6 @@ from serve import serve
 '''
 Ideas:
 - Create maybe a test-class for testing my API?
-- return currency ($)
-
 '''
 
 @click.group()

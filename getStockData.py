@@ -4,7 +4,7 @@ import pandas_datareader as pdr
 
 def get_stock_data(stock, start, end):
     '''
-    Gets data from a specific stock in a determined time.
+    Gets data from a specific stock in a determined time period.
     :param stock: stock name (type: string)
     :param start: start date (type: string)
     :param end: end date (type: string)
@@ -21,18 +21,18 @@ def get_stock_data(stock, start, end):
         ### Deleting whitespace in column "Adj Close"
         stock_data = stock_data.rename(columns={stock_data.columns[5]: "AdjClose"})
 
+        ### Add column "Name" to dataframe with stock name as values
+        stock_data["Name"] = stock
+
         return stock_data
 
     except ValueError as vE:
-        print("An error has occurred: "+ str(vE))
 
-        return 1
+        raise vE
 
     except Exception as ex:
 
-        print("An error has occured: " + str(ex))
-
-        return 1
+        raise ex
 
 
 
