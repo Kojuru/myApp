@@ -7,8 +7,10 @@ Ideas:
 Stockname in route --> e.g. localhost../aapl/mean?="Volume"?
 '''
 
+### TODO: Try/Except
+
 @click.command()
-###starts webserver (local) from command line (command: serve). Ggf. hier noch Click Argument?
+###starts webserver (local) from command line (command: serve).
 def serve():
     '''
     This script starts the webserver
@@ -24,7 +26,7 @@ def serve():
     @app.route('/mean', methods=["GET"])
     def get_mean():
 
-        '''### POST-Request --> specific Mean
+        '''### TODO: POST-Request --> specific Mean
         if request.method == "POST":
             target_column = request.get_data().decode("UTF-8")
 

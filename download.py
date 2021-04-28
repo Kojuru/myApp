@@ -3,6 +3,9 @@ import getStockData as gsd
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 
+'''
+DB in eine gesonderte File, bzw. abstrahieren
+'''
 
 engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stock_data')
 
@@ -39,8 +42,8 @@ def download(start, end, stock):
             ### insert stocklist into DB and check for duplicates
             stock.to_sql(name="temptable", con=engine, if_exists="replace", index="Date")
 
-            ### If duplicates exist, append only new values
-            with engine.begin() as cn:
+            ### If duplicates exist, append only new values.auch über unique index möglich
+            with engine.begin() as connection:
                 sql = """INSERT INTO stocklist (Date, High, Low, Open, Close, Volume, AdjClose, Name)
                                 SELECT t.Date, t.High, t.Low, t.Open, t.Close, t.Volume, t.AdjClose, t.Name
                                 FROM temptable t
@@ -49,7 +52,7 @@ def download(start, end, stock):
                                      WHERE t.Date = s.Date
                                      AND t.Name = s.Name)"""
 
-                cn.execute(sql)
+                connection.execute(sql)
 
         ### TODO: if no new data was inserted than echo something else
         click.echo("Data was stored in the table")
@@ -59,6 +62,7 @@ def download(start, end, stock):
     except Exception as ex:
         print("An error has occured: " + str(ex))
 
+        ### TODO: Some Traceback handling. This library doesnt work properly?
         #traceback.print_exc()
 
 

@@ -11,6 +11,8 @@ def get_stock_data(stock, start, end):
     :return: Pandas DataFrame object
     '''
 
+    ### try/except
+
     try:
         ### get stock data from yahooo
         stock_data = pdr.get_data_yahoo(stock,
